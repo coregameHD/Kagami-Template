@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" data-accent="vn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English — Kagami Visual Novel</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <script>if(localStorage.theme)document.documentElement.dataset.theme=localStorage.theme</script>
+</head>
+<body>
+    <aside class="side-nav"></aside>
+
+    <main class="workspace editor-split tools-right">
+        <!-- Snippet library -->
+        <aside class="pane pane-snippets">
+
+            <div class="card">
+                <div class="card-head"><h2 lang="th">Template (เกมฝั่งอังกฤษ)</h2></div>
+                <div class="card-body snippet-list" lang="th">
+                    <button class="btn-outline" data-snippet="【NEWS】 ⇒ Announcements
+
+ผู้ดูแลด้านภาษาและจัดจำหน่าย publisher
+ประกาศลิขสิทธิ์แปลเกมเวอร์ชั่นภาษาอังกฤษ
+
+description
+
+📅 Release Date ⋮ 
+🔗 Steam ⋮ ">ประกาศลิขสิทธิ์</button>
+                    <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้ดูแลด้านภาษาและจัดจำหน่าย publisher
+เปิดหน้าร้านค้า Steam
+
+romaji
+japanese
+(ชื่ออังกฤษ: englishtitle)
+
+description
+
+📅 Release Date ⋮ 
+🔗 Steam ⋮ ">ขึ้นรายละเอียดบนร้านค้า Steam</button>
+                    <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้ดูแลด้านภาษาและจัดจำหน่าย publisher
+กำหนดวันวางจำหน่ายเกมเวอร์ชั่นภาษาอังกฤษ
+
+romaji
+japanese
+(ชื่ออังกฤษ: englishtitle)
+
+description
+
+📅 Release Date ⋮ date (Confirmed)
+🔗 Steam ⋮ ">กำหนดวันวางจำหน่าย</button>
+                    <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้ดูแลด้านภาษาและจัดจำหน่าย publisher
+วางจำหน่ายเกมเวอร์ชั่นภาษาอังกฤษ
+
+romaji
+japanese
+(ชื่ออังกฤษ: englishtitle)
+
+{description}
+
+💰 ราคา ⋮ price บาท (ลด  % จนถึงวันที่ discountdate)
+🔗 Steam ⋮ ">วางจำหน่ายเกม</button>
+                </div>
+            </div>
+
+            <div class="card snippets-card"></div>
+        </aside>
+
+        <!-- Editor (filled by setupEditorPage) -->
+        <section class="pane pane-editor"></section>
+    </main>
+
+    <script src="/assets/app.js"></script>
+    <script>setupEditorPage();</script>
+</body>
+</html>

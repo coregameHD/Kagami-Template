@@ -1,0 +1,9 @@
+{
+  "name": "kagami-template",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Static post-generator site for Kagami Visual Novel and Kagami Nihongo",
+  "scripts": {
+    "start": "npx -y serve -l 3000 ."
+  }
+}

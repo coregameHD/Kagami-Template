@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" data-accent="vn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese — Kagami Visual Novel</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <script>if(localStorage.theme)document.documentElement.dataset.theme=localStorage.theme</script>
+</head>
+<body>
+    <aside class="side-nav"></aside>
+
+    <main class="workspace editor-split tools-right">
+        <!-- Snippet library -->
+        <aside class="pane pane-snippets">
+
+            <div class="card">
+                <div class="card-head"><h2 lang="th">Template (เกมฝั่งญี่ปุ่น)</h2></div>
+                <div class="card-body stack" lang="th">
+                    <div class="field">
+                        <label lang="en">Announcements</label>
+                        <div class="snippet-list">
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Announcements
+
+ผู้พัฒนาเกม developer
+เปิดตัวเกมใหม่อย่างเป็นทางการ
+
+romaji
+japanese
+
+{description}
+
+📅 Release Date ⋮ 
+🔗 Website ⋮ ">เปิดตัวเกมใหม่</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Announcements
+
+ผู้พัฒนาเกม developer ">อื่นๆ</button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label lang="en">Updates</label>
+                        <div class="snippet-list">
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer อัปเดตข้อมูลใหม่
+เปิดตัวเว็บไซต์ทางการ
+
+romaji
+japanese
+
+🔗 Website ⋮ ">เปิดตัวเว็บไซต์</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer อัปเดตข้อมูลใหม่
+เปิดเผยรายชื่อนักพากย์
+
+romaji
+japanese
+
+🔗 Website ⋮ ">เปิดเผยรายชื่อนักพากย์</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer อัปเดตข้อมูลใหม่
+กำหนดวันวางจำหน่าย
+
+romaji
+japanese
+
+📅 Release Date ⋮ 
+🔗 Website ⋮ ">กำหนดวันวางจำหน่าย</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer อัปเดตข้อมูลใหม่
+เลื่อนวันวางจำหน่าย
+
+romaji
+japanese
+
+📅 Release Date ⋮ date (Updated)
+🔗 Website ⋮ ">เลื่อนวันวางจำหน่าย</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer
+เปิดให้ดาวน์โหลดไทเค็นบัง (เวอร์ชั่นทดลองเล่น)
+
+romaji
+japanese
+
+📅 Release Date ⋮ 
+🔗 Download (Trial Edition) ⋮ ">Trial Version</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer
+ประกาศ Master up (เข้าสู่ขั้นตอนการผลิต)
+
+romaji
+japanese
+
+ยืนยันวันวางจำหน่าย date
+
+🔗 Website ⋮ 
+
+————————————
+Master up - แผ่นเกมต้นฉบับเข้าสู่กระบวนการผลิตเตรียมพร้อมสำหรับจัดจำหน่าย อนุมานได้ว่ามีโอกาส 99.95% ที่จะไม่เลื่อนวันวางขาย">Master up</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer
+วางจำหน่ายเกมอย่างเป็นทางการ
+
+romaji
+japanese
+
+description
+
+📅 Release Date ⋮ 
+🔗 Website ⋮ ">New Release</button>
+                            <button class="btn-outline" data-snippet="【NEWS】 ⇒ Updates
+
+ผู้พัฒนาเกม developer อัปเดตข้อมูลใหม่
+
+romaji
+japanese
+
+description
+
+🔗 Website ⋮ ">อื่นๆ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card snippets-card"></div>
+        </aside>
+
+        <!-- Editor (filled by setupEditorPage) -->
+        <section class="pane pane-editor"></section>
+    </main>
+
+    <script src="/assets/app.js"></script>
+    <script>setupEditorPage();</script>
+</body>
+</html>

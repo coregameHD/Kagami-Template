@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-accent="nihongo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คาตาคานะ — Kagami Nihongo</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <script>if(localStorage.theme)document.documentElement.dataset.theme=localStorage.theme</script>
+</head>
+<body>
+    <aside class="side-nav"></aside>
+
+    <main class="workspace split">
+        <section class="pane pane-form">
+            <div class="card">
+                <div class="card-head">
+                    <h2>Basic Information</h2>
+                </div>
+                <div class="card-body stack">
+                    <div class="grid-3">
+                        <div class="field">
+                            <label for="japanese-text">Japanese Text</label>
+                            <input type="text" id="japanese-text" lang="ja">
+                        </div>
+                        <div class="field">
+                            <label for="origin-text">Origin</label>
+                            <input type="text" id="origin-text">
+                        </div>
+                        <div class="field">
+                            <label for="thai-text">Thai Translation</label>
+                            <input type="text" id="thai-text" lang="th">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="gametitle">Game Title</label>
+                        <input type="text" id="gametitle">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="word-props"></div>
+
+            <div class="card">
+                <div class="card-head"><h2>Description</h2></div>
+                <textarea id="description" class="bare" spellcheck="false" style="min-height: 400px;"></textarea>
+            </div>
+        </section>
+
+        <aside class="pane pane-preview">
+            <div class="pane-head">
+                <h2>Preview</h2>
+                <span class="char-count" id="charCount"></span>
+            </div>
+            <pre id="preview"></pre>
+            <div class="pane-foot">
+                <button class="btn-danger" id="clearBtn">Clear Draft</button>
+                <button class="btn" id="copyBtn">Copy to Clipboard</button>
+            </div>
+        </aside>
+    </main>
+
+    <script src="/assets/app.js"></script>
+    <script>setupVocabPage('คำศัพท์คาตาคานะ', 'origin-text');</script>
+</body>
+</html>

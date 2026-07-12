@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en" data-accent="blog">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publish Guide — Kagami Blog</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <script>if(localStorage.theme)document.documentElement.dataset.theme=localStorage.theme</script>
+</head>
+<body>
+    <aside class="side-nav"></aside>
+
+    <main class="workspace doc-pane">
+        <h1>Publish to Production</h1>
+        <p class="sub">Posts are added manually — no automated import. A post is one row in <code>blog_posts</code> (D1 <code>kagamix</code>); a featured image is one or two objects in R2 <code>kagamix-media</code>, served from <code>https://img.kagamix.com</code>. Run every command from <code>web/</code> in the kagamix repo unless noted.</p>
+
+        <div class="card">
+            <div class="card-head">
+                <h2>Easiest way — npm run blog:add</h2>
+            </div>
+            <p>Write the post as a <code>.md</code> file with frontmatter (use the <a href="/blog">Post Generator</a> to build it), put the image next to it if any, then run one command <strong>from the repo root</strong>:</p>
+            <div class="code-block">
+                <pre id="cmd-add">npm run blog:add -- path/to/my-post.md</pre>
+            </div>
+            <button class="btn-quiet" data-copy-target="cmd-add" style="margin-top:0.6rem">Copy command</button>
+            <p style="margin-top:0.75rem">Compresses the image to WebP (display rendition + ≤400px thumbnail), uploads both to R2 as <code>media/&lt;sha256&gt;.webp</code>, inserts the DB row, prints the post URL. Always writes to <strong>production</strong> — there's no <code>--local</code> flag for this script.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Field reference</h2></div>
+            <table class="doc-table">
+                <thead><tr><th>Field</th><th>Required</th><th>Notes</th></tr></thead>
+                <tbody>
+                    <tr><td><code>title</code></td><td>yes</td><td>Post title</td></tr>
+                    <tr><td><code>body_md</code> / body</td><td>yes</td><td>Markdown; raw HTML stripped on render</td></tr>
+                    <tr><td><code>category</code></td><td>yes</td><td>General, Language, Thoughts, Visual Novel</td></tr>
+                    <tr><td><code>category2</code></td><td>no</td><td>Optional 2nd category, max 2 total</td></tr>
+                    <tr><td><code>published_at</code> / date</td><td>yes</td><td>Must be <code>YYYY-MM-DD</code> — drives filters</td></tr>
+                    <tr><td><code>status</code></td><td>no</td><td><code>published</code> or <code>draft</code> (default)</td></tr>
+                    <tr><td><code>storage_key</code></td><td>no</td><td>R2 key of full featured image</td></tr>
+                    <tr><td><code>thumb_key</code></td><td>no</td><td>R2 key of thumbnail</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Manual: text-only post</h2></div>
+            <p>Write the <code>INSERT</code> into a <code>.sql</code> file (avoids shell quoting pain with apostrophes/newlines):</p>
+            <div class="code-block">
+                <pre id="cmd-sql-text">INSERT INTO blog_posts (title, body_md, category, published_at, status) VALUES (
+  'ชื่อบทความ',
+  '# หัวข้อ
+
+เนื้อหาย่อหน้าแรก',
+  'General',
+  '2026-07-04',
+  'published'
+);</pre>
+            </div>
+            <p class="step-label">Apply</p>
+            <div class="code-block">
+                <pre id="cmd-apply-text">npx wrangler d1 execute kagamix --remote --file new-post.sql</pre>
+            </div>
+            <button class="btn-quiet" data-copy-target="cmd-apply-text" style="margin-top:0.6rem">Copy command</button>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Manual: post with a featured image</h2></div>
+            <p class="step-label">Upload to R2</p>
+            <div class="code-block">
+                <pre id="cmd-r2-put">npx wrangler r2 object put kagamix-media/blog/my-post.webp \
+  --file ./my-post.webp --content-type image/webp --remote</pre>
+            </div>
+            <button class="btn-quiet" data-copy-target="cmd-r2-put" style="margin-top:0.6rem">Copy command</button>
+            <p style="margin-top:0.75rem">Confirm it serves: <code>https://img.kagamix.com/blog/my-post.webp</code>. Simplest: use the same file for both full image and thumbnail. Optional lighter thumbnail:</p>
+            <div class="code-block">
+                <pre id="cmd-thumb">magick my-post.webp -resize 400x400 my-post-thumb.webp
+npx wrangler r2 object put kagamix-media/blog/my-post-thumb.webp \
+  --file ./my-post-thumb.webp --content-type image/webp --remote</pre>
+            </div>
+            <p class="step-label">Insert the row</p>
+            <div class="code-block">
+                <pre id="cmd-sql-image">INSERT INTO blog_posts
+  (title, body_md, category, category2, published_at, status,
+   storage_key, thumb_key, width, height)
+VALUES (
+  'รีวิวเกม ...',
+  'เนื้อหา markdown ...',
+  'Visual Novel',
+  'Language',
+  '2026-07-04',
+  'published',
+  'blog/my-post.webp',
+  'blog/my-post-thumb.webp',
+  1280, 720
+);</pre>
+            </div>
+            <p style="margin-top:0.75rem">Store <code>storage_key</code>/<code>thumb_key</code> as the R2 key only (<code>blog/my-post.webp</code>), not the full URL — the site prepends the domain.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Draft-then-publish workflow</h2></div>
+            <div class="code-block">
+                <pre id="cmd-drafts">npm run blog:drafts                      # list every draft
+npm run blog:publish -- 284              # publish post 284
+npm run blog:publish -- 284 "Visual Novel" Language   # publish + set categories</pre>
+            </div>
+            <button class="btn-quiet" data-copy-target="cmd-drafts" style="margin-top:0.6rem">Copy commands</button>
+            <p style="margin-top:0.75rem">Omit <code>status</code> (or set <code>draft</code>) to stage privately first — drafts 404 on <code>/blog/:id</code> and never appear in listings. <code>blog:publish</code> validates categories.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Editing, unpublishing, deleting</h2></div>
+            <div class="code-block">
+                <pre id="cmd-edit">npx wrangler d1 execute kagamix --remote \
+  --command "UPDATE blog_posts SET title = 'ชื่อใหม่' WHERE id = 284"
+
+npx wrangler d1 execute kagamix --remote \
+  --command "UPDATE blog_posts SET status = 'draft' WHERE id = 284"
+
+npx wrangler d1 execute kagamix --remote \
+  --command "DELETE FROM blog_posts WHERE id = 284"</pre>
+            </div>
+            <p style="margin-top:0.75rem">Deleting a row leaves its image in R2 (harmless). To remove it too:</p>
+            <div class="code-block">
+                <pre id="cmd-r2-delete">npx wrangler r2 object delete kagamix-media/blog/my-post.webp --remote</pre>
+            </div>
+            <button class="btn-quiet" data-copy-target="cmd-r2-delete" style="margin-top:0.6rem">Copy command</button>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><h2>Gotchas</h2></div>
+            <ul>
+                <li><strong>SQL apostrophes:</strong> inside a single-quoted SQL string, write <code>'</code> as <code>''</code> (e.g. <code>'don''t'</code>). The <code>.sql</code>-file approach avoids most shell-quoting pain.</li>
+                <li><strong><code>published_at</code> must be <code>YYYY-MM-DD</code></strong> — the year/month filters slice this string, so a full timestamp or other format breaks filtering.</li>
+                <li><strong>Test locally first</strong> if unsure: same commands with <code>--local</code>, then view via <code>wrangler dev</code> before running <code>--remote</code>.</li>
+                <li>Categories are fixed and in canonical display order regardless of DB order: <strong>General · Language · Thoughts · Visual Novel</strong>. Max 2 per post.</li>
+                <li>Changes show up within ~5 minutes (edge cache). <code>id</code> is auto-assigned — never set it, and never set <code>created_at</code> or <code>fb_post_id</code> (leftover, unused).</li>
+            </ul>
+        </div>
+    </main>
+
+    <script src="/assets/app.js"></script>
+    <script>setupCopyBlocks();</script>
+</body>
+</html>

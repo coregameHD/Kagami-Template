@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" data-accent="blog">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Post Generator — Kagami Template</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <script>if(localStorage.theme)document.documentElement.dataset.theme=localStorage.theme</script>
+</head>
+<body>
+    <aside class="side-nav"></aside>
+
+    <main class="workspace split">
+        <section class="pane pane-form">
+            <div class="card">
+                <div class="card-head"><h2>Post</h2></div>
+                <div class="card-body stack">
+                    <div class="field">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" lang="th">
+                    </div>
+                    <div class="grid-3">
+                        <div class="field">
+                            <label for="category">Category</label>
+                            <select id="category">
+                                <option value="General">General</option>
+                                <option value="Language">Language</option>
+                                <option value="Thoughts">Thoughts</option>
+                                <option value="Visual Novel">Visual Novel</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="category2">Category 2 (optional)</label>
+                            <select id="category2">
+                                <option value="">None</option>
+                                <option value="General">General</option>
+                                <option value="Language">Language</option>
+                                <option value="Thoughts">Thoughts</option>
+                                <option value="Visual Novel">Visual Novel</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="date">Date</label>
+                            <input type="date" id="date">
+                        </div>
+                    </div>
+                    <div class="grid-2-1">
+                        <div class="field">
+                            <label for="image">Image (optional, relative to .md file)</label>
+                            <input type="text" id="image" placeholder="./cover.jpg">
+                        </div>
+                        <div class="field">
+                            <label for="status">Status</label>
+                            <select id="status">
+                                <option value="published">published</option>
+                                <option value="draft">draft</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">
+                    <h2>Body (Markdown)</h2>
+                    <button class="btn-quiet" id="pasteBtn">Paste</button>
+                </div>
+                <textarea id="body" class="bare" lang="th" spellcheck="false" style="min-height: 450px;"></textarea>
+            </div>
+        </section>
+
+        <aside class="pane pane-preview">
+            <div class="pane-head">
+                <h2>Preview</h2>
+                <span class="char-count" id="charCount"></span>
+            </div>
+            <pre id="preview"></pre>
+            <div class="pane-foot">
+                <button class="btn-danger" id="clearBtn">Clear Draft</button>
+                <button class="btn" id="downloadBtn">Download .md</button>
+            </div>
+        </aside>
+    </main>
+
+    <script src="/assets/app.js"></script>
+    <script>
+        const date = $id('date');
+        const today = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        date.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+        const DOWNLOAD_NAME = 'blogpost.md';
+
+        setupGenerator(() => {
+            let category2 = $id('category2').value;
+            if (category2 === $id('category').value) category2 = '';
+            let output = `---\ntitle: ${$id('title').value}\ncategory: ${$id('category').value}\n`;
+            if (category2) output += `category2: ${category2}\n`;
+            output += `date: ${date.value}\n`;
+            if ($id('image').value.trim()) output += `image: ${$id('image').value.trim()}\n`;
+            output += `status: ${$id('status').value}\n---\n${$id('body').value}`;
+            return output;
+        });
+
+        $id('downloadBtn').addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([$id('preview').textContent], { type: 'text/markdown' }));
+            a.download = DOWNLOAD_NAME;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+
+        $id('pasteBtn').addEventListener('click', async () => {
+            try {
+                insertAtCursor($id('body'), await navigator.clipboard.readText());
+            } catch {
+                flash($id('pasteBtn'), 'Paste failed');
+            }
+        });
+    </script>
+</body>
+</html>
