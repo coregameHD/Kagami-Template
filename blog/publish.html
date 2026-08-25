@@ -20,7 +20,7 @@
             </div>
             <p>Write the post as a <code>.md</code> file with frontmatter (use the <a href="/blog">Post Generator</a> to build it), put the image next to it if any, then run one command <strong>from the repo root</strong>:</p>
             <div class="code-block">
-                <pre id="cmd-add">npm run blog:add -- path/to/my-post.md</pre>
+                <pre id="cmd-add">npm run blog:add -- blog/blogpost.md</pre>
             </div>
             <button class="btn-quiet" data-copy-target="cmd-add" style="margin-top:0.6rem">Copy command</button>
             <p style="margin-top:0.75rem">Compresses the image to WebP (display rendition + ≤400px thumbnail), uploads both to R2 as <code>media/&lt;sha256&gt;.webp</code>, inserts the DB row, prints the post URL. Always writes to <strong>production</strong> — there's no <code>--local</code> flag for this script.</p>

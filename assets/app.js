@@ -103,6 +103,7 @@ document.addEventListener('keydown', (e) => {
 // Fields without an id (e.g. checkboxes in a fieldset) key off their closest ancestor
 // id plus their value, so unlabeled checkbox groups still round-trip.
 const AUTOSAVE_KEY = `draft:${location.pathname}`;
+const AUTOSAVE_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
 function autosaveKeyFor(el) {
   if (el.id) return el.id;
@@ -120,7 +121,7 @@ function saveAutosave() {
   autosaveFields().forEach((el) => {
     data[autosaveKeyFor(el)] = el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value;
   });
-  localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+  localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
 }
 
 function clearAutosave() {
@@ -128,9 +129,11 @@ function clearAutosave() {
 }
 
 function setupAutosave() {
-  let saved;
+  let saved = {};
   try {
-    saved = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) || '{}');
+    const record = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) || 'null');
+    if (record && Date.now() - record.savedAt < AUTOSAVE_MAX_AGE_MS) saved = record.data;
+    else if (record) clearAutosave();
   } catch {
     saved = {};
   }
