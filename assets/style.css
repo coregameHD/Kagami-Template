@@ -222,6 +222,13 @@ button:disabled { opacity: 0.6; cursor: default; }
 
 .snippet-list { display: grid; gap: 0.5rem; }
 
+/* VNDB lookup */
+.vndb-meta { display: grid; gap: 0.3rem; font-size: 0.8rem; margin-bottom: 0.75rem; }
+.vndb-meta div { display: flex; gap: 0.5rem; }
+.vndb-meta .k { color: var(--muted); flex: none; width: 70px; }
+.vndb-meta .v { word-break: break-word; }
+.vndb-status { color: var(--muted); font-size: 0.8rem; min-height: 1em; }
+
 /* Home */
 .home-pane { padding: 3.5rem 4rem; }
 .home-pane h1 { font-weight: 800; letter-spacing: -0.02em; font-size: 2rem; line-height: 1.15; margin-bottom: 2.5rem; }

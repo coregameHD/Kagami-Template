@@ -207,11 +207,199 @@ const SNIPPETS_CARD = `
                     </div>
                 </div>`;
 
+// VNDB lookup card: paste a vndb.org link or a title, preview what VNDB has,
+// then "Fill Draft" replaces the placeholder words already sitting in the
+// editor (inserted there by a template snippet) with the real values.
+// `lang` ('ja' on the Japanese page, 'en' on the English one) picks which
+// localized release — Steam link, publisher, exact release date — to pull.
+const VNDB_CARD = `
+                <div class="card-head"><h2>VNDB Lookup</h2></div>
+                <div class="card-body stack">
+                    <div class="field">
+                        <label for="vndbQuery">VNDB link or title</label>
+                        <div class="row">
+                            <input type="text" id="vndbQuery" placeholder="https://vndb.org/v17 or a title">
+                            <button class="btn-outline" id="vndbFetchBtn">Fetch</button>
+                        </div>
+                    </div>
+                    <div class="snippet-list" id="vndbCandidates" hidden></div>
+                    <div id="vndbResult" hidden>
+                        <div class="vndb-meta" id="vndbMeta"></div>
+                        <button class="btn" id="vndbFillBtn">Fill Draft</button>
+                    </div>
+                    <p class="vndb-status" id="vndbStatus"></p>
+                </div>`;
+
+const VNDB_LINK_WANTED = [
+  ['Steam', 'steamUrl', (l) => l.name === 'steam'],
+  ['Website', 'websiteUrl', (l) => l.name === 'website' || /official/i.test(l.label)],
+  ['X (Twitter)', 'twitterUrl', (l) => l.name === 'twitter'],
+  ['Youtube', 'youtubeUrl', (l) => l.name === 'youtube'],
+];
+
+// VNDB descriptions carry BBCode-ish markup ([url=...]text[/url], [spoiler],
+// [b]/[i]) — drop the tags, keep the text.
+function stripVndbMarkup(text) {
+  if (!text) return '';
+  return text
+    .replace(/\[url=[^\]]*\]/gi, '')
+    .replace(/\[\/?(url|b|i|u|spoiler|code|raw)\]/gi, '')
+    .replace(/\r\n/g, '\n')
+    .trim();
+}
+
+function vndbTitle(vn, lang) {
+  const byLang = vn.titles.filter((t) => t.lang === lang);
+  return byLang.find((t) => t.main) || byLang.find((t) => t.official) || byLang[0] || null;
+}
+
+function vndbData(vn, release) {
+  const jaTitle = vndbTitle(vn, 'ja');
+  const enTitle = vndbTitle(vn, 'en');
+  const links = {};
+  VNDB_LINK_WANTED.forEach(([, key, match]) => {
+    const hit = (release?.extlinks || []).find(match) || (vn.extlinks || []).find(match);
+    if (hit) links[key] = hit.url;
+  });
+  const developer = (vn.developers || []).map((d) => d.name).join(', ');
+  const publisher = release?.producers?.find((p) => p.publisher && !p.developer)
+    || release?.producers?.find((p) => p.publisher);
+  return {
+    japanese: jaTitle ? jaTitle.title : '',
+    romaji: jaTitle ? (jaTitle.latin || kanaToRomaji(jaTitle.title)) : '',
+    englishtitle: enTitle ? enTitle.title : '',
+    developer,
+    publisher: publisher ? publisher.name : developer,
+    date: (release && release.released) || vn.released || '',
+    description: stripVndbMarkup(vn.description),
+    links,
+  };
+}
+
+function renderVndbMeta(data) {
+  const rows = [
+    ['Japanese', data.japanese], ['Romaji', data.romaji], ['English', data.englishtitle],
+    ['Developer', data.developer], ['Publisher', data.publisher], ['Released', data.date],
+  ].filter(([, v]) => v);
+  return rows.map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+}
+
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Word-boundary replace of a bare placeholder (case-sensitive, so the
+// capitalized "Date" in "Release Date" is left alone). A plain word and a
+// braced {word} are treated as the same slot.
+function fillPlaceholder(text, token, value) {
+  if (!value) return text;
+  const re = new RegExp(`\\{?\\b${escapeRe(token)}\\b\\}?`, 'g');
+  return text.replace(re, value);
+}
+
+function fillVndbDraft(editor, data) {
+  let text = editor.value;
+  // description goes last: it's free-form fetched prose and could otherwise
+  // contain a stray word (e.g. "date") that the later replacements would
+  // mistake for a placeholder.
+  [['romaji', data.romaji], ['japanese', data.japanese], ['englishtitle', data.englishtitle],
+    ['developer', data.developer], ['publisher', data.publisher], ['date', data.date],
+    ['description', data.description]].forEach(([token, value]) => {
+    text = fillPlaceholder(text, token, value);
+  });
+
+  // Empty "🔗 Label ⋮ " / "📅 Release Date ⋮ " slots (nothing typed after
+  // them yet) get the matching value appended.
+  VNDB_LINK_WANTED.forEach(([label, key]) => {
+    const url = data.links[key];
+    if (!url) return;
+    text = text.replace(new RegExp(`(🔗 ${escapeRe(label)} ⋮ )(?=\\n|$)`, 'g'), `$1${url}`);
+  });
+  if (data.date) text = text.replace(/(📅 Release Date ⋮ )(?=\n|$)/g, `$1${data.date}`);
+
+  editor.value = text;
+  editor.dispatchEvent(new Event('input'));
+}
+
+function setupVndbLookup(editor, lang) {
+  const input = $id('vndbQuery');
+  if (!input) return;
+  const fetchBtn = $id('vndbFetchBtn');
+  const fillBtn = $id('vndbFillBtn');
+  const candidatesEl = $id('vndbCandidates');
+  const resultEl = $id('vndbResult');
+  const metaEl = $id('vndbMeta');
+  const statusEl = $id('vndbStatus');
+  let current = null;
+
+  const setStatus = (msg) => { statusEl.textContent = msg; };
+
+  async function loadDetail(id) {
+    setStatus('Loading…');
+    candidatesEl.hidden = true;
+    resultEl.hidden = true;
+    try {
+      const res = await fetch(`/api/vndb?id=${id}&lang=${lang}`);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Lookup failed');
+      current = vndbData(body.vn, body.release);
+      metaEl.innerHTML = renderVndbMeta(current);
+      resultEl.hidden = false;
+      setStatus('');
+    } catch (err) {
+      setStatus(err.message || 'Lookup failed');
+    }
+  }
+
+  function renderCandidates(results) {
+    if (!results.length) {
+      setStatus('No matches');
+      return;
+    }
+    candidatesEl.innerHTML = results.map((vn) => {
+      const title = vndbTitle(vn, lang) || vndbTitle(vn, 'ja') || { title: vn.title };
+      return `<button class="btn-outline" data-vndb-id="${vn.id}">${title.title} (${vn.id})</button>`;
+    }).join('');
+    candidatesEl.hidden = false;
+    setStatus('');
+  }
+
+  candidatesEl.addEventListener('click', (e) => {
+    const id = e.target.dataset.vndbId;
+    if (id) loadDetail(id);
+  });
+
+  fetchBtn.addEventListener('click', async () => {
+    const query = input.value.trim();
+    if (!query) { setStatus('Paste a link or type a title'); return; }
+    resultEl.hidden = true;
+    candidatesEl.hidden = true;
+    const idMatch = query.match(/vndb\.org\/v(\d+)/i) || query.match(/^v?(\d+)$/i);
+    if (idMatch) { loadDetail(`v${idMatch[1]}`); return; }
+    setStatus('Searching…');
+    try {
+      const res = await fetch(`/api/vndb?search=${encodeURIComponent(query)}`);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Search failed');
+      if (body.results.length === 1) { loadDetail(body.results[0].id); return; }
+      renderCandidates(body.results);
+    } catch (err) {
+      setStatus(err.message || 'Search failed');
+    }
+  });
+
+  fillBtn.addEventListener('click', () => {
+    if (current) fillVndbDraft(editor, current);
+  });
+}
+
 // VN editor pages: snippet rail + freeform draft textarea, shared wiring.
 // The editor pane is identical on every page, so it's injected here too;
 // pages carry an empty <section class="pane pane-editor"></section>.
-function setupEditorPage() {
+// `lang` ('ja'/'en') wires up the VNDB Lookup card for pages that carry one
+// (an empty <div class="card vndb-card"></div>); omit it elsewhere.
+function setupEditorPage(lang) {
   document.querySelector('.snippets-card').innerHTML = SNIPPETS_CARD;
+  const vndbCard = document.querySelector('.vndb-card');
+  if (vndbCard) vndbCard.innerHTML = VNDB_CARD;
   document.querySelector('.pane-editor').innerHTML = `
             <div class="pane-head">
                 <h2>Post Draft</h2>
@@ -226,6 +414,7 @@ function setupEditorPage() {
   const charCount = $id('charCount');
   const updateCount = () => { charCount.textContent = `${editor.value.length} chars`; };
   setupSnippets(editor);
+  if (vndbCard) setupVndbLookup(editor, lang);
   editor.addEventListener('input', updateCount);
   $id('copyBtn').addEventListener('click', () => copyText($id('copyBtn'), editor.value));
   $id('clearBtn').addEventListener('click', () => {
