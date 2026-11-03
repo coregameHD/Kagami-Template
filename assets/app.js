@@ -187,24 +187,23 @@ const SNIPPETS_CARD = `
                         </div>
                     </div>
                     <div class="field">
-                        <label for="storyHookSelect">Hyperlink</label>
-                        <div class="row">
-                            <select id="storyHookSelect">
-                                <option value="🔗 Website ⋮ ">Website</option>
-                                <option value="🔗 X (Twitter) ⋮ ">X (Twitter)</option>
-                                <option value="🔗 Youtube ⋮ ">Youtube</option>
-                                <option value="🔗 Steam ⋮ ">Steam</option>
-                                <option disabled>──────────</option>
-                                <option value="🔗 Source ⋮ ">Source</option>
-                            </select>
-                            <button class="btn" data-snippet-select="storyHookSelect">Insert</button>
+                        <label>Hyperlink</label>
+                        <div class="grid-2">
+                            <button class="btn-outline" data-snippet="🔗 Website ⋮ ">Website</button>
+                            <button class="btn-outline" data-snippet="🔗 X (Twitter) ⋮ ">X (Twitter)</button>
+                            <button class="btn-outline" data-snippet="🔗 Youtube ⋮ ">Youtube</button>
+                            <button class="btn-outline" data-snippet="🔗 Steam ⋮ ">Steam</button>
+                            <button class="btn-outline" data-snippet="🔗 Source ⋮ ">Source</button>
                         </div>
                     </div>
-                    <div class="grid-2">
-                        <button class="btn-outline" data-snippet="📅 Release Date ⋮ {date}
+                    <div class="field">
+                        <label>อื่นๆ</label>
+                        <div class="grid-2">
+                            <button class="btn-outline" data-snippet="📅 Release Date ⋮ {date}
 ">วันที่จัดจำหน่าย</button>
-                        <button class="btn-outline" data-snippet="————————————
+                            <button class="btn-outline" data-snippet="————————————
 * หมายเหตุ ⋮ ">หมายเหตุ</button>
+                        </div>
                     </div>
                 </div>`;
 
