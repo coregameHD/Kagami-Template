@@ -47,7 +47,7 @@
                     <div class="grid-2-1">
                         <div class="field">
                             <label for="image">Image (optional, relative to .md file)</label>
-                            <input type="text" id="image" placeholder="./1.jpeg">
+                            <input type="text" id="image" value="./1.jpeg">
                         </div>
                         <div class="field">
                             <label for="status">Status</label>
@@ -89,7 +89,7 @@
         const pad = (n) => String(n).padStart(2, '0');
         date.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
-        const DOWNLOAD_NAME = 'blogpost.md';
+        const DOWNLOAD_NAME = 'post.md';
 
         setupGenerator(() => {
             let category2 = $id('category2').value;
