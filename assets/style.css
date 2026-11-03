@@ -107,10 +107,11 @@ body {
 }
 .card-head h2 { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.01em; }
 .stack > * + * { margin-top: 1rem; }
+.stack-tight > * + * { margin-top: 0.6rem; }
 
 /* Snippet rail (VN editor) */
 .pane-snippets { background: var(--surface); border-right: 1px solid var(--line); }
-.pane-snippets .card { padding: 1.25rem 1.25rem 1.5rem; border-bottom: 1px solid var(--line); }
+.pane-snippets .card { padding: 1.1rem 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
 
 /* Preview / editor panes: pinned head + foot, scrolling middle */
 .pane-preview, .pane-editor {
@@ -223,9 +224,11 @@ button:disabled { opacity: 0.6; cursor: default; }
 .snippet-list { display: grid; gap: 0.5rem; }
 
 /* VNDB lookup */
-.vndb-meta { display: grid; gap: 0.3rem; font-size: 0.8rem; margin-bottom: 0.75rem; }
-.vndb-meta div { display: flex; gap: 0.5rem; }
-.vndb-meta .k { color: var(--muted); flex: none; width: 70px; }
+/* Short facts (Developer, Released, ...) share a line; long ones (titles)
+   wrap to their own — flex-wrap finds the break, no field-specific rules. */
+.vndb-meta { display: flex; flex-wrap: wrap; column-gap: 0.9rem; row-gap: 0.3rem; font-size: 0.8rem; margin-bottom: 0.6rem; }
+.vndb-meta div { display: flex; gap: 0.3rem; max-width: 100%; }
+.vndb-meta .k { color: var(--muted); flex: none; }
 .vndb-meta .v { word-break: break-word; }
 .vndb-status { color: var(--muted); font-size: 0.8rem; min-height: 1em; }
 

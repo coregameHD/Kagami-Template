@@ -214,7 +214,7 @@ const SNIPPETS_CARD = `
 // localized release — Steam link, publisher, exact release date — to pull.
 const VNDB_CARD = `
                 <div class="card-head"><h2>VNDB Lookup</h2></div>
-                <div class="card-body stack">
+                <div class="card-body stack-tight">
                     <div class="field">
                         <label for="vndbQuery">VNDB link or title</label>
                         <div class="row">
