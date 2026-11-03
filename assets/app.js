@@ -253,6 +253,13 @@ function vndbTitle(vn, lang) {
   return byLang.find((t) => t.main) || byLang.find((t) => t.official) || byLang[0] || null;
 }
 
+// VNDB dates are ISO (YYYY-MM-DD); house format is DD/MM/YYYY. Leave
+// anything else (a bare year, "TBA", null) alone rather than mangle it.
+function formatVndbDate(date) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date || '');
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : (date || '');
+}
+
 function vndbData(vn, release) {
   const jaTitle = vndbTitle(vn, 'ja');
   const enTitle = vndbTitle(vn, 'en');
@@ -270,7 +277,7 @@ function vndbData(vn, release) {
     englishtitle: enTitle ? enTitle.title : '',
     developer,
     publisher: publisher ? publisher.name : developer,
-    date: (release && release.released) || vn.released || '',
+    date: formatVndbDate((release && release.released) || vn.released || ''),
     description: stripVndbMarkup(vn.description),
     links,
   };
